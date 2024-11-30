@@ -1,16 +1,22 @@
+from __future__ import annotations
 from enum import Enum
 from datetime import datetime
 import cv2
 
 
-class ClothingCategory(Enum):
+class EnumPlus(Enum):
+    def from_name(self, name: str) -> EnumPlus:
+        return EnumPlus.__members__[name]
+
+
+class ClothingCategory(EnumPlus):
     UNKNOWN = -1
     TOP = 0
     BOTTOM = 1
     SHOES = 2
 
 
-class Color(Enum):
+class Color(EnumPlus):
     UNKNOWN = -1
     BLACK = 0
     BLUE = 1
@@ -42,6 +48,10 @@ class Clothing:
         self.last_used_date = last_used_date
         self._image_path = image_path
         self._id = Clothing.generate_id()
+    
+    @property
+    def id(self) -> int:
+        return self._id
     
     def has_image(self) -> bool:
         return bool(self._image_path)
