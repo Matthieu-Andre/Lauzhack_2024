@@ -31,7 +31,13 @@ class Color(EnumPlus):
     YELLOW = 10
 
 
+class Weather(EnumPlus):
+    HOT = 0
+    COLD = 1
+    RAIN = 2
+    WIND = 3
 
+    
 class Clothing:
     _CLOTHES_COUNT = 0
     
@@ -40,14 +46,29 @@ class Clothing:
         cls._CLOTHES_COUNT += 1
         return cls._CLOTHES_COUNT - 1
         
-    def __init__(self, category: ClothingCategory = ClothingCategory.UNKNOWN, color: Color = Color.UNKNOWN, last_used_date: datetime = None, image_path: str = ""):
+    def __init__(self,
+                 descriptor: str = "",
+                 category: ClothingCategory = ClothingCategory.UNKNOWN,
+                 color: Color = Color.UNKNOWN,
+                 weather_compatibilities: list[Weather] = None,
+                 last_used_date: datetime = None,
+                 image_path: str = None
+        ):
+        
+        self._id = Clothing.generate_id()
+        if weather_compatibilities is None:
+            weather_compatibilities = []
         if last_used_date is None:
             last_used_date = datetime.now()
+        if image_path is None:
+            image_path = f"item{self._id}.jpg"
+            
+        self.descriptor = descriptor
         self.category = category
         self.color = color
+        self.weather_compatibilities = weather_compatibilities
         self.last_used_date = last_used_date
         self._image_path = image_path
-        self._id = Clothing.generate_id()
     
     @property
     def id(self) -> int:
@@ -55,6 +76,9 @@ class Clothing:
     
     def has_image(self) -> bool:
         return bool(self._image_path)
+    
+    def set_image_path(self, path: str) -> None:
+        self._image_path = path
     
     @property
     def image_path(self) -> str:
