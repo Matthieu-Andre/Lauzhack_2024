@@ -8,16 +8,13 @@ from db import DataBase
 app = FastAPI(title="aaaa")
 
 
-class Item(BaseModel):
-    name: str
-    description: str = None
-    price: float
-    tax: float = None
+class Image(BaseModel):
+    frame_data: str
 
 
 @app.post("/{user_id}/image}")
-def hello(user_id: str, frame_data: str):
-    decoded_bytes = base64.b64decode(frame_data)
+def hello(user_id: str, image: Image):
+    decoded_bytes = base64.b64decode(image.frame_data)
     # Convert bytes to a numpy array
     np_array = np.frombuffer(decoded_bytes, np.uint8)
     # Decode the numpy array back to an image
