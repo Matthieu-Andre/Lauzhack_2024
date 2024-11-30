@@ -43,8 +43,10 @@ class SQLClothing(Base):
     __tablename__ = "clothes"
     
     id = Column(Integer, primary_key=True)
+    descriptor = Column(String)
     category = Column(Integer)
     color = Column(Integer)
+    weather_compatibilities = Column(str)
     last_used_date = Column(String)
     image_path = Column(String)
     
@@ -52,8 +54,10 @@ class SQLClothing(Base):
     def from_python(cls, clothing: Clothing) -> SQLClothing:
         return cls(
             id=clothing.id,
+            descriptor=clothing.descriptor,
             category=clothing.category.name,
             color=clothing.color.name,
+            weather_compatibilities=json.dumps([comp.name for comp in clothing.weather_compatibilities]),
             last_used_date=str(clothing.last_used_date),
             image_path=clothing.image_path
         )
@@ -61,7 +65,9 @@ class SQLClothing(Base):
     def to_python(self) -> Clothing:
         return Clothing(
             category=ClothingCategory.from_name(self.category),
+            descriptor=self.descriptor,
             color=Color.from_name(self.color),
+            weather_compatibilities=list(map(Weather.from_name, json.loads(self.weather_compatibilities))),
             last_used_date=datetime.fromisoformat(self.last_used_date),
             image_path=self.image_path
         )
@@ -111,6 +117,7 @@ class DataBase:
         return self.session.query(SQLUser).filter_by(id=id).first()
     
     def add_clothing(self, user_id: str, item: Clothing) -> None:
+        self.store_image(item.image_path)
         user = self.get_user(user_id)
         self.session.add(SQLClothing.from_python(item))
         user.clothes_append(item)
@@ -122,8 +129,8 @@ class DataBase:
         clothes = self.session.query(SQLClothing).filter(SQLClothing.id.in_(clothe_ids)).all()
         return clothes
     
-    def store_image(self, image: cv2.typing.MatLike, id: str) -> None:
-        success = cv2.imwrite(os.path.join(self.images_path, id), image)
+    def store_image(self, image: cv2.typing.MatLike, name: str) -> None:
+        success = cv2.imwrite(os.path.join(self.images_path, name), image)
         if not success:
             print("Failed to save image")
 
