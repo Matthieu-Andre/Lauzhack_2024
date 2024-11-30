@@ -4,6 +4,7 @@ import cv2
 
 
 class ClothingCategory(Enum):
+    UNKNOWN = -1
     TOP = 0
     BOTTOM = 1
     SHOES = 2
@@ -11,9 +12,18 @@ class ClothingCategory(Enum):
 
 class Color(Enum):
     UNKNOWN = -1
-    RED = 0
-    GREEN = 1
-    BLUE = 2
+    BLACK = 0
+    BLUE = 1
+    BROWN = 2
+    GRAY = 3
+    GREEN = 4
+    ORANGE = 5
+    PINK = 6
+    PURPLE = 7
+    RED = 8
+    WHITE = 9
+    YELLOW = 10
+
 
 
 class Clothing:
@@ -24,7 +34,7 @@ class Clothing:
         cls._CLOTHES_COUNT += 1
         return cls._CLOTHES_COUNT - 1
         
-    def __init__(self, category: ClothingCategory, color: Color = Color.UNKNOWN, last_used_date: datetime = None, image_path: str = ""):
+    def __init__(self, category: ClothingCategory = ClothingCategory.UNKNOWN, color: Color = Color.UNKNOWN, last_used_date: datetime = None, image_path: str = ""):
         if last_used_date is None:
             last_used_date = datetime.now()
         self.category = category
