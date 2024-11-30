@@ -17,12 +17,12 @@ class Color(Enum):
 
 
 class Clothing:
-    CLOTHES_COUNT = 0
+    _CLOTHES_COUNT = 0
     
     @classmethod
     def generate_id(cls) -> int:
-        cls.CLOTHES_COUNT += 1
-        return cls.CLOTHES_COUNT - 1
+        cls._CLOTHES_COUNT += 1
+        return cls._CLOTHES_COUNT - 1
         
     def __init__(self, category: ClothingCategory, color: Color = Color.UNKNOWN, last_used_date: datetime = None, image_path: str = ""):
         if last_used_date is None:
