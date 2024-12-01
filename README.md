@@ -1,7 +1,7 @@
 # WearIt: Your Smart Dressing Companion 👗👕🎽
 
-![WearIt Logo](https://github.com/Matthieu-Andre/Lauzhack_2024/assets/logo.png "WearIt Logo")
-
+![WearIt Logo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/logo.png?raw=true "WearIt Logo")
+https://github.com/Matthieu-Andre/Lauzhack_2024?tab=readme-ov-file
 **WearIt** is a mobile application designed to make your mornings easier and your wardrobe smarter. By cataloging your clothes and learning your dressing habits, WearIt provides daily outfit recommendations tailored to your preferences, the weather, and more. Whether you're a student with a packed wardrobe or someone looking to streamline their dressing process, WearIt has you covered.
 
 ---
@@ -81,3 +81,14 @@ Have questions or suggestions? Reach out to us:
 ---
 
 **WearIt**: Transform your wardrobe, simplify your mornings, and own your style!  
+
+
+
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s1.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s2.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s3.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s4.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s5.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s6.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s7.png?raw=true)
+![Demo](https://github.com/Matthieu-Andre/Lauzhack_2024/blob/main/assets/s8.png?raw=true)
