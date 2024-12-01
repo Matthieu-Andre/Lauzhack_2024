@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system'; // Import expo-file-system
 import axios from 'axios';
 import Constants from "expo-constants";
 
-export default function App() {
+export default function Camera() {
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
     const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -68,7 +68,8 @@ export default function App() {
         // console.log(uri);
         try {
             // const response = await axios.post(`http://192.168.27.175:8000/${user_id}/image`, formData, {
-            const response = await axios.post(`http://192.168.27.175:8000/${user_id}/image`, formData, {
+            const response = await axios.post(`http://192.168.72.175:8000/${user_id}/image`, formData, {
+                // const response = await axios.post(`http://10.0.2.2:8000/${user_id}/image`, formData, {
 
                 headers: {
                     // 'Content-Type': 'multipart/form-data', // Do NOT set this manually
