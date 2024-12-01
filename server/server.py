@@ -14,12 +14,13 @@ app = FastAPI(title="aaaa")
 # Add CORS Middleware to allow requests from your frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update this to specific domains in production for security.
+    allow_origins=[
+        "*"
+    ],  # Allows all origins, use specific IPs/domains if needed for security
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
-
 
 
 app.mount("/images", StaticFiles(directory="images"), name="images")
@@ -40,7 +41,7 @@ def outfit_of_the_day(user_id: str, reload: bool = False) -> list[tuple[int, str
         outfit = server.db.get_outfit_of_the_day(user_id)
     else:
         outfit = server.outfit_recommendation(user_id)
-        
+
     return [(item.id, item.image_path) for item in outfit]
 
 
@@ -51,10 +52,9 @@ def outfit_of_the_day_confirm(user_id: str, item_list: list[int]):
 
 
 @app.get("/{user_id}/garderobe")
-def get_garderobe(user_id: str) -> dict[int, str]:
+def get_garderobe(user_id: str) -> list[str]:
     clothes = server.db.get_garderobe(user_id)
     return [f"{item.image_path}" for item in clothes]
-    return {item.id: item.get_encoded_image() for item in clothes}
 
 
 # @app.get("/{user_id}/garderobe/{clothing_id}")
@@ -89,18 +89,17 @@ async def upload_file(user_id: str, file: UploadFile = File(...)):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-
 class Server:
     def __init__(self):
         self.db = DataBase()
         self.identifier = ClothingIdentifier()
-    
+
     def new_clothing_from_image(self, user_id: str, image: bytes) -> None:
         image_path = self.db.complete_image_path(Clothing.next_image_path())
         self.db.store_image_from_bytes(image, image_path)
         item = self.identifier.process(image_path)
         self.db.add_clothing(user_id, item)
-    
+
     def new_clothing_from_path(self, user_id: str, image_path: str) -> None:
         with open(image_path, "rb") as f:
             a = f.read()
@@ -121,4 +120,6 @@ if __name__ == "__main__":
 
     print("Recommended outfit:")
     for rec in outfit:
-        print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
+        print(
+            f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})"
+        )
