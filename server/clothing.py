@@ -22,7 +22,7 @@ class Color(EnumPlus):
     BLACK = 0
     BLUE = 1
     BROWN = 2
-    GRAY = 3
+    GREY = 3
     GREEN = 4
     ORANGE = 5
     PINK = 6
