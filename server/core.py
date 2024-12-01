@@ -12,14 +12,11 @@ import random
 
 class OpenAIClient:
     # Load API key from JSON file
-    with open("Lauzhack_2024/server/apikey.json", "r") as config_file:
+    with open("apikey.json", "r") as config_file:
         config = json.load(config_file)
         api_key = config["openai_api_key"]
 
     client = OpenAI(api_key=api_key)
-
-
-
 
 
 
