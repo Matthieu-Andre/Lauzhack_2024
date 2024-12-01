@@ -57,6 +57,9 @@ class SQLUser(Base):
         clothes = self.get_clothes()
         clothes.append(item.id)
         self._set_clothes(clothes)
+
+    def __repr__(self) -> str:
+        return f"User <id: {self.id}> <clothes: {self.clothes}> <outfit_of_the_day: {self.outfit_of_the_day}>"
     
     
     
@@ -92,6 +95,9 @@ class SQLClothing(Base):
             last_used_date=datetime.fromisoformat(self.last_used_date),
             image_path=self.image_path
         )
+    
+    def __repr__(self) -> str:
+        return f"Clothing <id: {self.id}> <descriptor: {self.descriptor}> <category: {self.category}> <color: {self.category}> <weather_compatibilities: {self.weather_compatibilities}> <last_used_date: {self.last_used_date}> <image_path: {self.image_path}>"
 
 
 def create_directory(path: str) -> None:
@@ -116,10 +122,20 @@ class DataBase:
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         # TODO: call self.session.close() somewhere
+        
+        Clothing.set_clothes_count(len(self.all_clothes_list()))
     
     def commit(self) -> None:
         self.session.commit()
 
+    def user_list(self) -> list[str]:
+        user_ids = [user[0] for user in self.session.query(SQLUser.id).all()]
+        return user_ids
+    
+    def all_clothes_list(self) -> list[int]:
+        clothes_ids = [user[0] for user in self.session.query(SQLClothing.id).all()]
+        return clothes_ids
+    
     def add_user(self, id: str) -> None:
         user = SQLUser(id=id, clothes="[]")
         self.session.add(user)
@@ -138,7 +154,6 @@ class DataBase:
         return self.session.query(SQLUser).filter_by(id=id).first()
     
     def add_clothing(self, user_id: str, item: Clothing) -> None:
-        self.store_image(item.image_path)
         user = self.get_user(user_id)
         self.session.add(SQLClothing.from_python(item))
         user.clothes_append(item)
@@ -173,9 +188,15 @@ class DataBase:
     def has_outfit_of_the_day(self, user_id: str) -> bool:
         return self.get_outfit_of_the_day(user_id) is not None
         
-    def store_image(self, image: cv2.typing.MatLike, name: str) -> None:
-        success = cv2.imwrite(os.path.join(self.images_path, name), image)
+    def store_image_from_bytes(self, image: bytes, path: str) -> None:
+        with open(path, "wb") as f:
+            f.write(image)
+        
+    def store_image_from_cv2(self, image: cv2.typing.MatLike, path: str) -> None:
+        success = cv2.imwrite(path, image)
         if not success:
             print("Failed to save image")
 
+    def complete_image_path(self, path: str) -> str:
+        return os.path.join(self.images_path, path)
 
