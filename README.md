@@ -57,19 +57,6 @@ https://github.com/Matthieu-Andre/Lauzhack_2024?tab=readme-ov-file
 
 ---
 
-## 💌 Contributing
-Interested in contributing to **WearIt**? We'd love your feedback, ideas, and collaboration!  
-Submit issues or pull requests on our [GitHub repository](#).
-
----
-
-## 🤝 Contact
-Have questions or suggestions? Reach out to us:  
-- Email: [support@wearit.com](mailto:support@wearit.com)  
-- Twitter: [@WearItApp](https://twitter.com/WearItApp)  
-
----
-
 **WearIt**: Transform your wardrobe, simplify your mornings, and own your style!  
 
 
