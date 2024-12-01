@@ -293,6 +293,57 @@ def order_clothing_by_category(clothing_list: list[Clothing]) -> list[Clothing]:
     return ordered_clothing
 
 
+import requests
+import base64
+
+
+def try_on_clothing(image_path: str, clothing_path: str, item: Clothing):
+    # Use this function to convert an image file from the filesystem to base64
+    def image_file_to_base64(image_path):
+        with open(image_path, 'rb') as f:
+            image_data = f.read()
+        return base64.b64encode(image_data).decode('utf-8')
+
+    api_key = "SG_3d4ca7396257cf46"
+    url = "https://api.segmind.com/v1/try-on-diffusion"
+
+    # Replace these paths with the actual paths to your local images
+    model_image_path = image_path
+    cloth_image_path = clothing_path
+
+    if item is None:
+        raise ValueError("A Clothing instance must be provided.")
+
+    if item.category == ClothingCategory.BOTTOM:
+        my_cat = "Lower body"
+    else:
+        my_cat = "Upper body"
+
+    # Request payload
+    data = {
+    "model_image": image_file_to_base64(model_image_path),  # Convert local model image to base64
+    "cloth_image": image_file_to_base64(cloth_image_path),  # Convert local cloth image to base64
+    "category": my_cat,
+    "num_inference_steps": 20,
+    "guidance_scale": 2,
+    "seed": 12467,
+    "base64": False
+    }
+
+    headers = {'x-api-key': api_key}
+
+    response = requests.post(url, json=data, headers=headers)
+    # Save the response content as a .jpg image
+    output_image_path = "MyCode/virtual_rendered_outfit.jpg"
+
+    if response.status_code == 200:  # Ensure the request was successful
+        with open(output_image_path, 'wb') as f:
+            f.write(response.content)  # Write the binary content to a file
+        print(f"Image saved as {output_image_path}")
+    else:
+        print(f"Failed to generate image. Status code: {response.status_code}, Response: {response.text}")
+
+
 
 # To test alone
 # if __name__ == "__main__":
@@ -334,3 +385,8 @@ def order_clothing_by_category(clothing_list: list[Clothing]) -> list[Clothing]:
 #     print("Recommended Outfit:")
 #     for rec in recommendations:
 #         print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
+
+# if __name__ == "__main__":
+#     my_cloth = Clothing("t-shirt", ClothingCategory.TOP, Color.WHITE, [Weather.HOT])
+#     try_on_clothing("MyCode/ELONMUSK.jpg", "MyCode/shirt.jpg", my_cloth)
+#     print("done")

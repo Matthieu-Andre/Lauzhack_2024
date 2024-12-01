@@ -1,0 +1,21 @@
+# General Python packages
+numpy==1.24.4             # For numerical computations and array handling
+requests==2.31.0          # For making HTTP requests
+pydantic==1.10.2          # For data validation and settings management
+fastapi==0.95.1           # For creating APIs
+uvicorn==0.22.0           # FastAPI server
+
+# Database
+sqlalchemy==2.0.16        # For ORM and database interactions
+
+# Meteostat for weather data
+meteostat==1.6.5          # For weather station data
+
+# OpenAI API
+openai==0.27.8           # For interacting with OpenAI's API
+
+# OpenCV for image processing
+opencv-python-headless==4.8.0.74  # Lightweight OpenCV version for server environments
+
+# Optional: If using SQLite with custom serialization
+sqlite3==3.35.5           # Database engine (often bundled with Python)
