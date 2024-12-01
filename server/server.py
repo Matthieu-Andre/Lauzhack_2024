@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import cv2
 import base64
@@ -21,6 +22,9 @@ app.add_middleware(
 
 
 
+app.mount("/images", StaticFiles(directory="images"), name="images")
+
+
 class Image(BaseModel):
     frame_data: str
 
@@ -33,6 +37,7 @@ def outfit_of_the_day(user_id: str, reload: bool):
 @app.get("/{user_id}/garderobe")
 def get_garderobe(user_id: str) -> dict[int, str]:
     clothes = server.db.get_garderobe(user_id)
+    return {item.id: f"{item.image_path}" for item in clothes}
     return {item.id: item.get_encoded_image() for item in clothes}
 
 
@@ -87,11 +92,11 @@ class Server:
 server = Server()
 
 
-if __name__ == "__main__":
-    with open("temp/jacket.jpg", "rb") as f:
-        a = f.read()
-    server.new_clothing_from_image("sloan", a)
-    outfit = server.outfit_recommendation("sloan")
-    print("Recommended outfit: ")
-    for i, x in enumerate(outfit):
-        print(f"{i}.", x)
+# if __name__ == "__main__":
+#     with open("temp/jacket.jpg", "rb") as f:
+#         a = f.read()
+#     server.new_clothing_from_image("sloan", a)
+#     outfit = server.outfit_recommendation("sloan")
+#     print("Recommended outfit: ")
+#     for i, x in enumerate(outfit):
+#         print(f"{i}.", x)
