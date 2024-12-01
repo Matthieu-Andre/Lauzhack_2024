@@ -22,7 +22,7 @@ const ClothingItem = ({ images, visible, initialIndex, onClose }) => {
             >
                 {images.map((item, index) => (
                     <View key={index} style={styles.imageContainer}>
-                        <Image source={{ uri: `http://192.168.72.175:8000${item}` }} style={styles.fullScreenImage} />
+                        <Image source={{ uri: `http://192.168.72.175:8000/${item}` }} style={styles.fullScreenImage} />
                     </View>
                 ))}
             </Swiper>

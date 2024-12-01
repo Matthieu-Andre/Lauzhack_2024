@@ -1,41 +1,68 @@
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useNavigation } from '@react-navigation/native';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-export default function OutfitOfTheDayScreen() {
+export default function OutfitOfTheDay() {
   // Get navigation to change header title
   const navigation = useNavigation();
+  const [outfit, setOutfit] = useState([]);
+  const userId = 'sloan'; // Example userId; replace with dynamic user ID if needed
 
   // Update navigation title to "Outfit of the Day"
-  navigation.setOptions({ title: 'Outfit of the Day' });
+  useEffect(() => {
+    navigation.setOptions({ title: 'Outfit of the Day' });
+  }, [navigation]);
+
+  // Function to fetch the outfit of the day from backend
+  const fetchOutfit = async (reload = false) => {
+    try {
+      const response = await axios.get(`http://192.168.72.175:8000/${userId}/outfit_of_the_day`, {
+        params: { reload: reload }
+      });
+      setOutfit(response.data);
+    } catch (error) {
+      console.error("Failed to fetch outfit of the day:", error);
+    }
+  };
+
+  // Fetch outfit of the day on component mount
+  useEffect(() => {
+    fetchOutfit();
+  }, []);
+
+  // Handler for generating a new outfit
+  const handleGenerateNewOutfit = () => {
+    fetchOutfit(true); // Fetch a new outfit with reload=true
+  };
+
+  // Handler for accepting the current outfit
+  const handleAcceptOutfit = () => {
+    console.log('Outfit accepted');
+  };
 
   return (
     <View style={styles.container}>
       {/* Expanded container for Hat, Top, Bottom, Shoes */}
       <View style={styles.clothingContainer}>
-        <View style={styles.box}>
-          <Text style={styles.boxText}>Hat</Text>
-        </View>
-        <View style={styles.box}>
-          <Text style={styles.boxText}>Top</Text>
-        </View>
-        <View style={styles.box}>
-          <Text style={styles.boxText}>Bottom</Text>
-        </View>
-        <View style={styles.box}>
-          <Text style={styles.boxText}>Shoes</Text>
-        </View>
+        {outfit.map(([id, imagePath], index) => (
+          <View key={id} style={styles.box}>
+            <Image
+              source={{ uri: `http://192.168.72.175:8000/${imagePath}` }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </View>
+        ))}
       </View>
-
-      {/* Separator */}
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
       {/* Buttons for accepting and generating a new outfit, aligned to the bottom */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={[styles.button, styles.acceptButton]} onPress={() => console.log('Outfit accepted')}>
+        <TouchableOpacity style={[styles.button, styles.acceptButton]} onPress={handleAcceptOutfit}>
           <Text style={styles.buttonText}>Accept Outfit</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.generateButton]} onPress={() => console.log('Generate new outfit')}>
+        <TouchableOpacity style={[styles.button, styles.generateButton]} onPress={handleGenerateNewOutfit}>
           <Text style={styles.buttonText}>Generate New Outfit</Text>
         </TouchableOpacity>
       </View>
@@ -47,44 +74,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    justifyContent: 'space-between', // Distribute space between clothing boxes and buttons
+    justifyContent: 'space-between',
   },
   clothingContainer: {
-    flex: 4, // Allocate more space to clothing items
-    justifyContent: 'space-evenly', // Space clothing items evenly
+    flex: 5,
+    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
   box: {
     width: '80%',
-    height: 160, // Increase the height to give it a more prominent presence
+    flex: 1,
     backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
-    marginVertical: 5,
+    marginVertical: 10,
   },
-  boxText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  separator: {
-    marginVertical: 20,
-    height: 1,
+  image: {
     width: '100%',
-    backgroundColor: '#ccc',
+    height: '100%',
+    borderRadius: 10,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10, // Slight increase in margin for better spacing
     width: '100%',
     alignItems: 'center',
+    marginBottom: 10,
   },
   button: {
     flex: 1,
     paddingVertical: 15,
     borderRadius: 10,
-    marginHorizontal: 10, // Increase horizontal margin for better spacing between buttons
+    marginHorizontal: 10,
     alignItems: 'center',
   },
   acceptButton: {
@@ -100,4 +122,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OutfitOfTheDayScreen;
+export default OutfitOfTheDay;

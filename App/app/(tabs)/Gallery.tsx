@@ -50,8 +50,12 @@ const Gallery = () => {
         renderItem={({ item, index }) => (
           <TouchableOpacity onPress={() => handleImagePress(index)}>
             <View style={[styles.imageContainer, { width: imageSize, height: imageSize }]}>
-              <Image source={{ uri: `http://192.168.72.175:8000${item}` }} style={styles.image} />
-              <Text style={styles.itemName}>{item}</Text>
+              <Image
+                source={{ uri: `http://192.168.72.175:8000/${item}` }}
+                style={styles.image}
+                resizeMode="cover" // Use resizeMode as a prop
+              />
+              {/* <Text style={styles.itemName}>{item}</Text> */}
             </View>
           </TouchableOpacity>
         )}
@@ -92,7 +96,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   itemName: {
     marginTop: 5,
