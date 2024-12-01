@@ -80,11 +80,18 @@ class Server:
         item = self.identifier.process(image_path)
         self.db.add_clothing(user_id, item)
 
+    def outfit_recommendation(self, user_id: str) -> list[Clothing]:
+        return outfit_recommendation(self.db.get_garderobe(user_id))
+
 
 server = Server()
 
 
 if __name__ == "__main__":
-    with open("images/t.jpg", "rb") as f:
+    with open("temp/jacket.jpg", "rb") as f:
         a = f.read()
     server.new_clothing_from_image("sloan", a)
+    outfit = server.outfit_recommendation("sloan")
+    print("Recommended outfit: ")
+    for i, x in enumerate(outfit):
+        print(f"{i}.", x)

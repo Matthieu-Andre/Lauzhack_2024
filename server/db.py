@@ -76,6 +76,7 @@ class SQLClothing(Base):
     
     @classmethod
     def from_python(cls, clothing: Clothing) -> SQLClothing:
+        print("CLOTHING: ", clothing)
         return cls(
             id=clothing.id,
             descriptor=clothing.descriptor,

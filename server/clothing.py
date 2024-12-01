@@ -9,7 +9,7 @@ from typing import Optional
 class EnumPlus(Enum):
     @classmethod
     def from_name(cls, name: str, *, default: Optional[EnumPlus] = None) -> EnumPlus:
-        elem = EnumPlus.__members__.get(name)
+        elem = cls.__members__.get(name)
         if elem is not None:
             return elem
         if default is not None:
