@@ -23,7 +23,11 @@ class OpenAIClient:
 class ClothingIdentifier:
     def __init__(self):
         # Pre-prompt so that we get exactly what we want in the format we want
-        self.pre_prompt = "Analyze the following image and provide the response in this strict format: object name, category, dominant color, [weather suitability]. Categories: footwear, lower_body_clothing, upper_body_clothing, over_upper_body_clothing. Colors: Red, Blue, Green, Yellow, Purple, Orange, Brown, White, Black, Grey, Pink. Weather suitability: hot, cold, rain, wind, or a combination (e.g., [hot, rain])."
+        
+        self.pre_prompt = "Analyze the following image and provide the response in this strict format: object name, category, dominant color, [weather suitability]. Categories: footwear, lower_body_clothing, upper_body_clothing_, over_upper_body_clothing. Colors: Red, Blue, Green, Yellow, Purple, Orange, Brown, White, Black, Grey, Pink. Weather suitability: hot, cold, rain, wind, or a combination (e.g., [hot, rain])." "You cannot say that you cannot help, if you do not knwo you have to guess an item that could be realistic."
+
+        # "If the image is too difficult to analyze or there are too much things to describe, please only return a single clothing item with the strict format discussed: object name, category, dominant color, (weather suitabilities)."
+
 
     #Function to analyze an image using OpenAI Vision API
     #Returns object name, category, dominant color, [weather suitability]
@@ -49,6 +53,7 @@ class ClothingIdentifier:
                         ],
                     }
                 ],
+                seed = 2
             )
 
             # Extract and return the result
@@ -69,23 +74,34 @@ class ClothingIdentifier:
             if not guess_string:
                 raise ValueError("The 'guess' key is missing or empty.")
 
-            print("aaa2")
-            # Split the string by the first square bracket to isolate weather suitability
-            parts = guess_string.split("[", 1)
-            before_bracket = parts[0].strip()  # Part before the square bracket
-            within_bracket = parts[1].rstrip("]").strip() if len(parts) > 1 else ""  # Content within the square bracket
+            # Clean the guess string by removing explicit labels
+            cleaned_string = guess_string.replace("Object name:", "").replace("Category:", "").replace("Dominant color:", "").replace("Weather suitability:", "")
 
-            print("aaa3")
-            # Split the part before the square bracket by commas
-            result = [item.strip() for item in before_bracket.split(",") if item.strip()]
+            # Initialize variables for result and weather suitability
+            result = []
+            temp = ""
+            found_bracket = False
 
-            print("aaa4")
-            # Parse the weather suitability as a tuple
-            weather_suitability = tuple(item.strip() for item in within_bracket.split(",") if item.strip())
-            result.append(weather_suitability)
+            # Process the string character by character
+            for char in cleaned_string:
+                if char == "[":
+                    found_bracket = True
+                    if temp.strip():
+                        result.extend(item.strip() for item in temp.split(",") if item.strip())
+                    temp = ""  # Reset temp to start collecting weather suitability
+                elif char == "]" and len(result) >= 3:  # Stop if ] is found and at least 4 elements exist
+                    if temp.strip():
+                        weather_suitability = [item.strip() for item in temp.split(",") if item.strip()]
+                        result.append(weather_suitability)
+                    return result
+                else:
+                    temp += char
+
+            # Finalize the parsing if no `]` was encountered
+            if temp.strip():
+                result.extend(item.strip() for item in temp.split(",") if item.strip())
+
             data: tuple[str, str, str, tuple[str]] = tuple(result)
-
-            print("aaa5")
             print(data)
             descriptor = data[0]
             category_map = {
@@ -94,14 +110,10 @@ class ClothingIdentifier:
                 "upper_body_clothing": "TOP",
                 "over_upper_body_clothing": "OVER_TOP"
             }
-            print("aaa6")
             category = ClothingCategory.from_name(category_map[data[1]], default=ClothingCategory.UNKNOWN)
-            print("aaa7")
             color = Color.from_name(data[2].upper(), default=Color.UNKNOWN)
-            print("aaa8")
             weather_compatibilities = list(filter(bool, map(lambda w: Weather.from_name(w.upper(), default=None), data[3])))
             
-            print("aaa9")
             return Clothing(
                 descriptor=descriptor,
                 category=category,
@@ -234,7 +246,7 @@ def complete_outfit_with_openai(
         prompt = (
             f"Select the best clothing item for a stylish outfit in the {category} category. "
             f"Available options: {', '.join(item_descriptions)}"
-            "The ouptut has to be a strict format as: object name, category, dominant color, [weather suitability]." "Say nothin else."
+            "The ouptut has to be a strict format as: object name, category, dominant color, [weather suitability]." "Say nothing else."
         )
 
         # Use OpenAI to select the best item
@@ -265,6 +277,14 @@ def complete_outfit_with_openai(
 
 
 
+# To test alone
+# if __name__ == "__main__":
+#     image_path = "MyCode/matthias.jpg"
+#     my_cloth = ClothingIdentifier()
+#     result = my_cloth.analyze_image(image_path)
+#     parsed_result = my_cloth.parse_output_to_list(result)
+#     print(parsed_result)
+ 
 
 
 ###Code to try
