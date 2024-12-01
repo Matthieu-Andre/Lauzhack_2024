@@ -54,11 +54,6 @@ https://github.com/Matthieu-Andre/Lauzhack_2024?tab=readme-ov-file
 
 ---
 
-## 🛡 Privacy and Security
-We respect your privacy. All your data is securely stored and never shared without your consent.
-
----
-
 ## 🌟 Vision for the Future
 - **3D Outfit Visualization**: See your outfits on a 3D model of yourself for better visualization.  
 - **Friend Networks**: Share your "Outfit of the Day" with friends and vote on each other's next-day outfits.  
