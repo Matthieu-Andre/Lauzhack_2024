@@ -2,6 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from datetime import datetime
 import cv2
+import base64
 
 
 class EnumPlus(Enum):
@@ -88,3 +89,9 @@ class Clothing:
     
     def get_image(self) -> cv2.typing.MatLike:
         return cv2.imread(self.image_path)
+    
+    def get_encoded_image(self) -> str:
+        _, buffer = cv2.imencode('.jpg', self.get_image())
+        # Convert to base64 string
+        image_data = base64.b64encode(buffer).decode('utf-8')
+        return image_data
