@@ -1,11 +1,24 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import cv2
 import base64
+from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 from db import *
+from core import *
 
 app = FastAPI(title="aaaa")
+
+# Add CORS Middleware to allow requests from your frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Update this to specific domains in production for security.
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 class Image(BaseModel):
@@ -40,14 +53,38 @@ def image(user_id: str, image: Image):
     return "image saved"
 
 
+@app.post("/{user_id}/image")
+async def upload_file(user_id: str, file: UploadFile = File(...)):
+    print("BBBBBBBBB")
+    user_images_path = f"./users/{user_id}/images"
+    os.makedirs(user_images_path, exist_ok=True)
+    try:
+        content = await file.read()
+        server.new_clothing_from_image(user_id, content)
+        return JSONResponse(
+            content={"message": "File uploaded successfully"}, status_code=200
+        )
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+
+
 class Server:
     def __init__(self):
         self.db = DataBase()
+        self.identifier = ClothingIdentifier()
     
-    def new_clothing_from_image(self, user_id: str, image: cv2.typing.MatLike) -> None:
-        item = Clothing()
-        self.db.store_image(image, item.image_path)
+    def new_clothing_from_image(self, user_id: str, image: bytes) -> None:
+        image_path = self.db.complete_image_path(Clothing.next_image_path())
+        self.db.store_image_from_bytes(image, image_path)
+        item = self.identifier.process(image_path)
         self.db.add_clothing(user_id, item)
 
 
 server = Server()
+
+
+if __name__ == "__main__":
+    with open("images/t.jpg", "rb") as f:
+        a = f.read()
+    server.new_clothing_from_image("sloan", a)

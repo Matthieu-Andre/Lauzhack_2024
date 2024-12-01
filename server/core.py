@@ -61,7 +61,7 @@ class ClothingIdentifier:
 
             # Extract and return the result
             guess = response.choices[0].message.content
-            return {"guess": guess}
+            return image_path, {"guess": guess}
 
         except Exception as e:
             return {"error": str(e)}
@@ -69,8 +69,9 @@ class ClothingIdentifier:
 
     #Function to convert openAI garbage output to usable list
     #Returns a list like: ['cap', 'upper_body_clothing', 'Black', ('hot', 'wind')]    
-    def parse_output_to_list(self, guess):
+    def parse_output_to_list(self, image_path: str, guess):
         try:
+            print("aaa1")
             # Extract the actual string from the dictionary
             guess_string = guess.get("guess", "")
             if not guess_string:
@@ -103,9 +104,37 @@ class ClothingIdentifier:
             if temp.strip():
                 result.extend(item.strip() for item in temp.split(",") if item.strip())
 
-            return result
+            data: tuple[str, str, str, tuple[str]] = tuple(result)
+            print(data)
+            descriptor = data[0]
+            category_map = {
+                "footwear": "SHOES",
+                "lower_body_clothing": "BOTTOM",
+                "upper_body_clothing": "TOP",
+                "over_upper_body_clothing": "OVER_TOP"
+            }
+            category = ClothingCategory.from_name(category_map[data[1]], default=ClothingCategory.UNKNOWN)
+            color = Color.from_name(data[2].upper(), default=Color.UNKNOWN)
+            weather_compatibilities = list(filter(bool, map(lambda w: Weather.from_name(w.upper(), default=None), data[3])))
+            
+            return Clothing(
+                descriptor=descriptor,
+                category=category,
+                color=color,
+                weather_compatibilities=weather_compatibilities,
+                image_path=image_path
+            )
+        
         except Exception as e:
+            raise
+            print(f"got error: {e}")
+            return Clothing(image_path=image_path)
             raise ValueError(f"Failed to parse the output: {e}")
+        
+    def process(self, image_path: str) -> Clothing:
+        return self.parse_output_to_list(
+            *self.analyze_image(image_path)
+        )
 
 
 
@@ -289,11 +318,3 @@ def complete_outfit_with_openai(
 #     print("Recommended Outfit:")
 #     for rec in recommendations:
 #         print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
-
-
-
-
-
-
-
-

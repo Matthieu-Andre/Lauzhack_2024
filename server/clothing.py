@@ -3,11 +3,18 @@ from enum import Enum
 from datetime import datetime
 import cv2
 import base64
+from typing import Optional
 
 
 class EnumPlus(Enum):
-    def from_name(self, name: str) -> EnumPlus:
-        return EnumPlus.__members__[name]
+    @classmethod
+    def from_name(cls, name: str, *, default: Optional[EnumPlus] = None) -> EnumPlus:
+        elem = EnumPlus.__members__.get(name)
+        if elem is not None:
+            return elem
+        if default is not None:
+            return default
+        raise KeyError(f"no element {name}")
 
 
 class ClothingCategory(EnumPlus):
@@ -15,6 +22,7 @@ class ClothingCategory(EnumPlus):
     TOP = 0
     BOTTOM = 1
     SHOES = 2
+    OVER_TOP = 3
 
 
 class Color(EnumPlus):
@@ -43,6 +51,14 @@ class Clothing:
     _CLOTHES_COUNT = 0
     
     @classmethod
+    def set_clothes_count(cls, count: int) -> None:
+        cls._CLOTHES_COUNT = count
+
+    @classmethod
+    def next_image_path(cls) -> str:
+        return f"item{cls._CLOTHES_COUNT}.jpg"
+    
+    @classmethod
     def generate_id(cls) -> int:
         cls._CLOTHES_COUNT += 1
         return cls._CLOTHES_COUNT - 1
@@ -54,15 +70,14 @@ class Clothing:
                  weather_compatibilities: list[Weather] = None,
                  last_used_date: datetime = None,
                  image_path: str = None
-        ):
-        
+                ):
+        if image_path is None:
+            image_path = Clothing.next_image_path()
         self._id = Clothing.generate_id()
         if weather_compatibilities is None:
             weather_compatibilities = []
         if last_used_date is None:
             last_used_date = datetime.now()
-        if image_path is None:
-            image_path = f"item{self._id}.jpg"
             
         self.descriptor = descriptor
         self.category = category
@@ -74,7 +89,7 @@ class Clothing:
     @property
     def id(self) -> int:
         return self._id
-    
+
     def has_image(self) -> bool:
         return bool(self._image_path)
     

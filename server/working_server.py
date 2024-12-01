@@ -54,6 +54,7 @@ def hello():
 # @app.post("/upload-photo/")
 @app.post("/{user_id}/image")
 async def upload_file(user_id: str, file: UploadFile = File(...)):
+    print("AAAAAAAAAAAAAAAAAAAAAAAA")
     user_images_path = f"./users/{user_id}/images"
     os.makedirs(user_images_path, exist_ok=True)
     try:
