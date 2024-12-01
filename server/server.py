@@ -12,7 +12,24 @@ class Image(BaseModel):
     frame_data: str
 
 
-@app.post("/{user_id}/image}")
+@app.get("/{user_id}/outfit_of_the_day")
+def outfit_of_the_day(user_id: str, reload: bool):
+    pass
+
+
+@app.get("/{user_id}/garderobe")
+def get_garderobe(user_id: str) -> dict[int, str]:
+    clothes = server.db.get_garderobe(user_id)
+    return {item.id: item.get_encoded_image() for item in clothes}
+
+
+@app.get("/{user_id}/garderobe/{clothing_id}")
+def get_garderobe_item(user_id: str, clothing_id: int) -> dict[int, str]:
+    item = server.db.get_item(user_id, clothing_id)
+    return {item.id: item.get_encoded_image()}
+
+
+@app.post("/{user_id}/garderobe")
 def image(user_id: str, image: Image):
     decoded_bytes = base64.b64decode(image.frame_data)
     # Convert bytes to a numpy array
