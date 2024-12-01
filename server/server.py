@@ -63,15 +63,15 @@ def get_garderobe(user_id: str) -> dict[int, str]:
 #     return {item.id: item.get_encoded_image()}
 
 
-@app.post("/{user_id}/garderobe")
-def image(user_id: str, image: Image):
-    decoded_bytes = base64.b64decode(image.frame_data)
-    # Convert bytes to a numpy array
-    np_array = np.frombuffer(decoded_bytes, np.uint8)
-    # Decode the numpy array back to an image
-    decoded_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-    server.new_clothing_from_image(decoded_image, f"{user_id}_test.jpg")
-    return "image saved"
+# @app.post("/{user_id}/garderobe")
+# def image(user_id: str, image: Image):
+#     decoded_bytes = base64.b64decode(image.frame_data)
+#     # Convert bytes to a numpy array
+#     np_array = np.frombuffer(decoded_bytes, np.uint8)
+#     # Decode the numpy array back to an image
+#     decoded_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+#     server.new_clothing_from_image(decoded_image, f"{user_id}_test.jpg")
+#     return "image saved"
 
 
 @app.post("/{user_id}/image")
@@ -119,6 +119,7 @@ if __name__ == "__main__":
 
     outfit = server.outfit_recommendation("sloan")
 
+    print("\n\n")
     print("Recommended outfit:")
     for rec in outfit:
         print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
