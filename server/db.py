@@ -67,7 +67,7 @@ class SQLClothing(Base):
     descriptor = Column(String)
     category = Column(Integer)
     color = Column(Integer)
-    weather_compatibilities = Column(str)
+    weather_compatibilities = Column(String)
     last_used_date = Column(String)
     image_path = Column(String)
     
