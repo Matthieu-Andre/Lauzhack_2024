@@ -35,8 +35,19 @@ def users():
 
 
 @app.get("/{user_id}/outfit_of_the_day")
-def outfit_of_the_day(user_id: str, reload: bool):
-    server.outfit_recommendation(user_id)
+def outfit_of_the_day(user_id: str, reload: bool = False) -> list[tuple[int, str]]:
+    if server.db.has_outfit_of_the_day(user_id) and reload == False:
+        outfit = server.db.get_outfit_of_the_day(user_id)
+    else:
+        outfit = server.outfit_recommendation(user_id)
+        
+    return [(item.id, item.image_path) for item in outfit]
+
+
+@app.post("/{user_id}/outfit_of_the_day/confirm")
+def outfit_of_the_day_confirm(user_id: str, item_list: list[int]):
+    outfit = [server.db.get_item(user_id, item_id) for item_id in item_list]
+    server.db.set_outfit_of_the_day(user_id, outfit)
 
 
 @app.get("/{user_id}/garderobe")
@@ -89,6 +100,11 @@ class Server:
         self.db.store_image_from_bytes(image, image_path)
         item = self.identifier.process(image_path)
         self.db.add_clothing(user_id, item)
+    
+    def new_clothing_from_path(self, user_id: str, image_path: str) -> None:
+        with open(image_path, "rb") as f:
+            a = f.read()
+        self.new_clothing_from_image(user_id, a)
 
     def outfit_recommendation(self, user_id: str) -> list[Clothing]:
         return outfit_recommendation(self.db.get_garderobe(user_id))
@@ -97,11 +113,11 @@ class Server:
 server = Server()
 
 
-# if __name__ == "__main__":
-#     with open("temp/jacket.jpg", "rb") as f:
-#         a = f.read()
-#     server.new_clothing_from_image("sloan", a)
-#     outfit = server.outfit_recommendation("sloan")
-#     print("Recommended outfit: ")
-#     for i, x in enumerate(outfit):
-#         print(f"{i}.", x)
+if __name__ == "__main__":
+    # for x in ["crocs.jpg", "green_tshirt.jpg", "hat.jpg", "jacket.jpg", "jeans.jpg", "pants.jpg", "skirt.jpg", "thongs.jpg", "white_tshirt.jpg", "woman.jpg"]:
+    #     server.new_clothing_from_path("sloan", os.path.join("temp/", x))
+
+    outfit = server.outfit_recommendation("sloan")
+    print("Recommended outfit: ")
+    for i, x in enumerate(outfit):
+        print(f"{i}.", x)
