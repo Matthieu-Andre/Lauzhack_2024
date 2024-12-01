@@ -10,6 +10,7 @@ import datetime
 import random
 
 
+
 class OpenAIClient:
     # Load API key from JSON file
     with open("apikey.json", "r") as config_file:
@@ -234,71 +235,62 @@ def complete_outfit_with_openai(
     items: list[Clothing],
     weather_conditions: dict
 ) -> list[Clothing]:
-    # categories = ['footwear', 'lower_body_clothing', 'upper_body_clothing', 'over_upper_body_clothing']
     categories = list(ClothingCategory.__members__.values())
-
-    # Exclude the category of the initial item
     missing_categories = [cat for cat in categories if cat != initial_item.category]
-    #print(f"Missing categories: {missing_categories}")
-
-    # Prepare lists for each category
-    recommendations = []  # Final recommended items for each category
+    recommendations = []
 
     for category in missing_categories:
-        # Filter items by category
         items_in_category = [item for item in items if item.category == category]
 
-        # Find weather-suitable items in this category
-        weather_suitable_items = [
+        # Strict match: Select items matching all current weather conditions
+        strict_weather_suitable_items = [
             item for item in items_in_category
-            if any(cond in weather_conditions for cond in item.weather_compatibilities)
+            if all(cond in item.weather_compatibilities for cond, present in weather_conditions.items() if present)
         ]
 
-        # If weather-suitable items exist, restrict to them; otherwise, use all items in this category
-        final_items = weather_suitable_items if weather_suitable_items else items_in_category
-        #print(f"Category: {category}, Final items: {[item.descriptor for item in final_items]}")
+        # Fallback: Select items partially matching weather conditions
+        partial_weather_suitable_items = [
+            item for item in items_in_category
+            if any(cond in item.weather_compatibilities for cond, present in weather_conditions.items() if present)
+        ] if not strict_weather_suitable_items else []
 
-        # Prepare data for OpenAI API
-        item_descriptions = [
-            f"{item.descriptor} ({item.category.name.lower()}, {item.color.name.lower()}, suitable for {[comp.name.lower() for comp in item.weather_compatibilities]})"
-            for item in final_items
-        ]
+        # Use strict match if available, otherwise fallback
+        final_items = strict_weather_suitable_items or partial_weather_suitable_items
 
-        # OpenAI prompt to select the best style
-        prompt = (
-            f"Select the best clothing item for a stylish outfit in the {category.name.lower()} category. "
-            f"Available options: {', '.join(item_descriptions)}"
-            "The ouptut has to be a strict format as: object name, category, dominant color, [weather suitability]." "Say nothing else."
-        )
+        if final_items:
+            recommendations.append(final_items[0])  # Choose first item for simplicity
+        else:
+            # No match, pick a random item to ensure at least one from this category
+            if items_in_category:
+                recommendations.append(random.choice(items_in_category))
 
-        # Use OpenAI to select the best item
-        try:
-            print("GPTTTTTTTTTTTTT")
-            response = OpenAIClient.client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a fashion expert."},
-                    {"role": "user", "content": prompt}
-                ],
-                seed = 2,
-                max_tokens=100,
-            )
-            selected_item_name = response.choices[0].message.content.strip()
-            print("GPTTTTTTTTTTTTT", response.choices, selected_item_name)
-            #print(f"OpenAI response for {category}: {selected_item_name}")
+    recommendations.append(initial_item)  # Add the initial item to the recommendations
 
-            # Find the selected item by name
-            selected_item = next((item for item in final_items if item.descriptor in selected_item_name), None)
-            if selected_item:
-                recommendations.append(selected_item)
-                #print(f"Added {selected_item.descriptor} to recommendations.")
-
-        except Exception as e:
-            print(f"Error with OpenAI API for category {category}: {e}")
-            continue
-
-    #print(f"Final recommendations: {[item.descriptor for item in recommendations]}")
     return recommendations
+
+
+def order_clothing_by_category(clothing_list: list[Clothing]) -> list[Clothing]:
+    """
+    Orders clothing elements by categories: over_top, top, bottom, shoes.
+
+    :param clothing_list: List of Clothing objects.
+    :return: List of Clothing objects ordered by category.
+    """
+    # Define the category order
+    category_order = {
+        ClothingCategory.OVER_TOP: 0,
+        ClothingCategory.TOP: 1,
+        ClothingCategory.BOTTOM: 2,
+        ClothingCategory.SHOES: 3
+    }
+
+    # Sort the list based on the category order
+    ordered_clothing = sorted(
+        clothing_list,
+        key=lambda item: category_order.get(item.category, float('inf'))  # Default to inf for unknown categories
+    )
+
+    return ordered_clothing
 
 
 
@@ -313,30 +305,32 @@ def complete_outfit_with_openai(
 
 
 ###Code to try
-if __name__ == "__main__":
-    # Define clothing items
-    clothes = [
-        Clothing("Rain Boots", "footwear", "black", ["rain", "cold"]),
-        Clothing("Sneakers", "footwear", "white", ["hot", "wind"]),
-        Clothing("Jeans", "lower_body_clothing", "blue", ["cold", "wind"]),
-        Clothing("Shorts", "lower_body_clothing", "red", ["hot"]),
-        Clothing("T-Shirt", "upper_body_clothing", "white", ["hot"]),
-        Clothing("Jacket", "over_upper_body_clothing", "black", ["cold", "rain"]),
-        Clothing("Raincoat", "over_upper_body_clothing", "yellow", ["rain"]),
-        Clothing("Pullover", "upper_body_clothing", "Brown", ["rain"]),
-    ]
+# if __name__ == "__main__":
+#     # Define clothing items
+#     clothes = [
+#             Clothing("Rain Boots", ClothingCategory.SHOES, Color.BLACK, [Weather.RAIN, Weather.COLD]),
+#             Clothing("Sneakers", ClothingCategory.SHOES, Color.WHITE, [Weather.HOT, Weather.WIND]),
+#             Clothing("Jeans", ClothingCategory.BOTTOM, Color.BLUE, [Weather.COLD, Weather.WIND]),
+#             Clothing("Shorts", ClothingCategory.BOTTOM, Color.RED, [Weather.HOT]),
+#             Clothing("T-Shirt", ClothingCategory.TOP, Color.WHITE, [Weather.HOT]),
+#             Clothing("Jacket", ClothingCategory.OVER_TOP, Color.BLACK, [Weather.HOT, Weather.RAIN]),
+#             Clothing("Raincoat", ClothingCategory.OVER_TOP, Color.YELLOW, [Weather.COLD, Weather.RAIN]),
+#             Clothing("Pullover", ClothingCategory.TOP, Color.BROWN, [Weather.RAIN]),
+#         ]
 
-    # Get current weather conditions
-    weather_conditions = get_meteo()
-    print(f"Weather Conditions: {weather_conditions}")
 
-    # Start with an initial item (e.g., Rain Boots)
-    initial_item = clothes[0]  # Assume the first item is chosen
-    print(f"Initial Item: {initial_item.descriptor} ({initial_item.category}, {initial_item.color}, {initial_item.weather_compatibilities})")
+#     # Get current weather conditions
+#     weather_conditions = get_meteo()
+#     print(f"Weather Conditions: {weather_conditions}")
 
-    # Generate the complete outfit
-    recommendations = complete_outfit_with_openai(initial_item, clothes, weather_conditions)
+#     # Start with an initial item (e.g., Rain Boots)
+#     initial_item = clothes[0]  # Assume the first item is chosen
+#     print(f"Initial Item: {initial_item.descriptor} ({initial_item.category}, {initial_item.color}, {initial_item.weather_compatibilities})")
 
-    print("Recommended Outfit:")
-    for rec in recommendations:
-        print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
+#     # Generate the complete outfit
+#     recommendations = complete_outfit_with_openai(initial_item, clothes, weather_conditions)
+
+#     recommendations = order_clothing_by_category(recommendations)
+#     print("Recommended Outfit:")
+#     for rec in recommendations:
+#         print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
