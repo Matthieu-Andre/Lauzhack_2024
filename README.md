@@ -38,11 +38,6 @@ https://github.com/Matthieu-Andre/Lauzhack_2024?tab=readme-ov-file
 - A smartphone with Android or iOS.
 - An internet connection for weather updates.
 
-### Installation
-1. Download the **WearIt** app from the [Google Play Store](#) or [Apple App Store](#). *(Links coming soon!)*  
-2. Sign up or log in to get started.  
-3. Add your clothes and start receiving personalized outfit suggestions!
-
 ---
 
 ## 📚 Tech Stack
