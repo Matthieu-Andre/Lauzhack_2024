@@ -127,7 +127,6 @@ class ClothingIdentifier:
             )
         
         except Exception as e:
-            raise
             print(f"got error: {e}")
             return Clothing(image_path=image_path)
             raise ValueError(f"Failed to parse the output: {e}")
