@@ -129,6 +129,12 @@ class DataBase:
         clothes = self.session.query(SQLClothing).filter(SQLClothing.id.in_(clothe_ids)).all()
         return clothes
     
+    def get_item(self, user_id: str, item_id: int) -> Clothing:
+        for item in self.get_garderobe(user_id):
+            if item.id == item_id:
+                return item
+        raise ValueError(f"Item not found in user {user_id}'s garderobe")
+    
     def store_image(self, image: cv2.typing.MatLike, name: str) -> None:
         success = cv2.imwrite(os.path.join(self.images_path, name), image)
         if not success:
