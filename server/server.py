@@ -29,9 +29,14 @@ class Image(BaseModel):
     frame_data: str
 
 
+@app.get("/users")
+def users():
+    return server.db.user_list()
+
+
 @app.get("/{user_id}/outfit_of_the_day")
 def outfit_of_the_day(user_id: str, reload: bool):
-    pass
+    server.outfit_recommendation(user_id)
 
 
 @app.get("/{user_id}/garderobe")
@@ -41,10 +46,10 @@ def get_garderobe(user_id: str) -> dict[int, str]:
     return {item.id: item.get_encoded_image() for item in clothes}
 
 
-@app.get("/{user_id}/garderobe/{clothing_id}")
-def get_garderobe_item(user_id: str, clothing_id: int) -> dict[int, str]:
-    item = server.db.get_item(user_id, clothing_id)
-    return {item.id: item.get_encoded_image()}
+# @app.get("/{user_id}/garderobe/{clothing_id}")
+# def get_garderobe_item(user_id: str, clothing_id: int) -> dict[int, str]:
+#     item = server.db.get_item(user_id, clothing_id)
+#     return {item.id: item.get_encoded_image()}
 
 
 @app.post("/{user_id}/garderobe")
