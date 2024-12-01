@@ -53,7 +53,7 @@ def outfit_of_the_day_confirm(user_id: str, item_list: list[int]):
 @app.get("/{user_id}/garderobe")
 def get_garderobe(user_id: str) -> dict[int, str]:
     clothes = server.db.get_garderobe(user_id)
-    return {item.id: f"{item.image_path}" for item in clothes}
+    return [f"{item.image_path}" for item in clothes]
     return {item.id: item.get_encoded_image() for item in clothes}
 
 
@@ -118,6 +118,7 @@ if __name__ == "__main__":
     #     server.new_clothing_from_path("sloan", os.path.join("temp/", x))
 
     outfit = server.outfit_recommendation("sloan")
-    print("Recommended outfit: ")
-    for i, x in enumerate(outfit):
-        print(f"{i}.", x)
+
+    print("Recommended outfit:")
+    for rec in outfit:
+        print(f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})")
