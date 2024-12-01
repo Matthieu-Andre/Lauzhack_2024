@@ -104,23 +104,32 @@ class Server:
         with open(image_path, "rb") as f:
             a = f.read()
         self.new_clothing_from_image(user_id, a)
+    
+    def new_clothes_from_directory(self, user_id: str, path: str) -> None:
+        for root, _, filenames in os.walk(path):
+            for filename in filenames:
+                file = os.path.join(root, filename)
+                self.new_clothing_from_path(user_id, file)
 
     def outfit_recommendation(self, user_id: str) -> list[Clothing]:
         return outfit_recommendation(self.db.get_garderobe(user_id))
 
 
+
 server = Server()
 
 
-if __name__ == "__main__":
-    # for x in ["crocs.jpg", "green_tshirt.jpg", "hat.jpg", "jacket.jpg", "jeans.jpg", "pants.jpg", "skirt.jpg", "thongs.jpg", "white_tshirt.jpg", "woman.jpg"]:
-    #     server.new_clothing_from_path("sloan", os.path.join("temp/", x))
+# if __name__ == "__main__":
+#     # for x in ["crocs.jpg", "green_tshirt.jpg", "hat.jpg", "jacket.jpg", "jeans.jpg", "pants.jpg", "skirt.jpg", "thongs.jpg", "white_tshirt.jpg", "woman.jpg"]:
+#     #     server.new_clothing_from_path("sloan", os.path.join("temp/", x))
+#     user = "sloan"
+#     server.new_clothes_from_directory(user, "../clothes/")
 
-    outfit = server.outfit_recommendation("sloan")
+#     outfit = server.outfit_recommendation(user)
 
-    print("\n\n")
-    print("Recommended outfit:")
-    for rec in outfit:
-        print(
-            f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})"
-        )
+#     print("\n\n")
+#     print("Recommended outfit:")
+#     for rec in outfit:
+#         print(
+#             f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})"
+#         )
