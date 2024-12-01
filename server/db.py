@@ -7,10 +7,30 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import json
 from clothing import *
+from sqlalchemy.types import TypeDecorator, String
 
 
 # Define the base class for all models
 Base = declarative_base()
+
+
+class ListType(TypeDecorator):
+    """
+    A custom SQLAlchemy type to store Python lists as JSON strings in the database.
+    """
+    impl = String
+
+    def process_bind_param(self, value: list, dialect) -> str:
+        if value is None:
+            return None
+        if not isinstance(value, list):
+            raise ValueError("Value must be a list")
+        return json.dumps(value)
+
+    def process_result_value(self, value: str, dialect) -> list:
+        if value is None:
+            return None
+        return json.loads(value)
 
 
 class SQLUser(Base):
@@ -18,6 +38,7 @@ class SQLUser(Base):
 
     id = Column(String, primary_key=True)  # user_id as primary key
     clothes = Column(String)  # Store serialized list as string
+    outfit_of_the_day = Column(ListType, nullable=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -135,6 +156,23 @@ class DataBase:
                 return item
         raise ValueError(f"Item not found in user {user_id}'s garderobe")
     
+    def has_item(self, user_id: str, item_id: int) -> bool:
+        try:
+            self.get_item(user_id, item_id)
+            return True
+        except ValueError:
+            return False
+        
+    def set_outfit_of_the_day(self, user_id: str, outfit: list[int]) -> None:
+        # TODO: check outfit contains only clothes owned by the user
+        self.get_user(user_id).outfit_of_the_day = outfit
+    
+    def get_outfit_of_the_day(self, user_id: str) -> list[int] | None:
+        return self.get_user(user_id).outfit_of_the_day
+    
+    def has_outfit_of_the_day(self, user_id: str) -> bool:
+        return self.get_outfit_of_the_day(user_id) is not None
+        
     def store_image(self, image: cv2.typing.MatLike, name: str) -> None:
         success = cv2.imwrite(os.path.join(self.images_path, name), image)
         if not success:
