@@ -164,7 +164,7 @@ class DataBase:
         user = self.get_user(user_id)
         clothe_ids = user.get_clothes()
         clothes = self.session.query(SQLClothing).filter(SQLClothing.id.in_(clothe_ids)).all()
-        return clothes
+        return [item.to_python() for item in clothes]
     
     def get_item(self, user_id: str, item_id: int) -> Clothing:
         for item in self.get_garderobe(user_id):

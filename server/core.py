@@ -114,7 +114,7 @@ class ClothingIdentifier:
                 "upper_body_clothing": "TOP",
                 "over_upper_body_clothing": "OVER_TOP"
             }
-            category = ClothingCategory.from_name(category_map[data[1]], default=ClothingCategory.UNKNOWN)
+            category = ClothingCategory.from_name(category_map[data[1].lower()], default=ClothingCategory.UNKNOWN)
             color = Color.from_name(data[2].upper(), default=Color.UNKNOWN)
             weather_compatibilities = list(filter(bool, map(lambda w: Weather.from_name(w.upper(), default=False), data[3])))
             
@@ -127,7 +127,6 @@ class ClothingIdentifier:
             )
         
         except Exception as e:
-            raise
             print(f"got error: {e}")
             return Clothing(image_path=image_path)
             raise ValueError(f"Failed to parse the output: {e}")
@@ -188,9 +187,10 @@ def outfit_recommendation(items: list[Clothing]) -> list[Clothing]:
     weather_conditions = get_meteo()
     initial_item = pick_random_suitable_item(items, weather_conditions)
     outfit = complete_outfit_with_openai(initial_item, items, weather_conditions)
-    print(outfit)
-    outfit.append(initial_item)
-    print(items)
+    outfit = order_clothing_by_category(outfit)
+    # print(outfit)
+    # outfit.append(initial_item)
+    # print(items)
     return outfit
 
 
@@ -356,30 +356,30 @@ def try_on_clothing(image_path: str, clothing_path: str, item: Clothing):
 
 
 ###Code to try
-# if __name__ == "__main__":
-#     # Define clothing items
-#     clothes = [
-#             Clothing("Rain Boots", ClothingCategory.SHOES, Color.BLACK, [Weather.RAIN, Weather.COLD]),
-#             Clothing("Sneakers", ClothingCategory.SHOES, Color.WHITE, [Weather.HOT, Weather.WIND]),
-#             Clothing("Jeans", ClothingCategory.BOTTOM, Color.BLUE, [Weather.COLD, Weather.WIND]),
-#             Clothing("Shorts", ClothingCategory.BOTTOM, Color.RED, [Weather.HOT]),
-#             Clothing("T-Shirt", ClothingCategory.TOP, Color.WHITE, [Weather.HOT]),
-#             Clothing("Jacket", ClothingCategory.OVER_TOP, Color.BLACK, [Weather.HOT, Weather.RAIN]),
-#             Clothing("Raincoat", ClothingCategory.OVER_TOP, Color.YELLOW, [Weather.COLD, Weather.RAIN]),
-#             Clothing("Pullover", ClothingCategory.TOP, Color.BROWN, [Weather.RAIN]),
-#         ]
+if __name__ == "__main__":
+    # Define clothing items
+    clothes = [
+            Clothing("Rain Boots", ClothingCategory.SHOES, Color.BLACK, [Weather.RAIN, Weather.COLD]),
+            Clothing("Sneakers", ClothingCategory.SHOES, Color.WHITE, [Weather.HOT, Weather.WIND]),
+            Clothing("Jeans", ClothingCategory.BOTTOM, Color.BLUE, [Weather.COLD, Weather.WIND]),
+            Clothing("Shorts", ClothingCategory.BOTTOM, Color.RED, [Weather.HOT]),
+            Clothing("T-Shirt", ClothingCategory.TOP, Color.WHITE, [Weather.HOT]),
+            Clothing("Jacket", ClothingCategory.OVER_TOP, Color.BLACK, [Weather.HOT, Weather.RAIN]),
+            Clothing("Raincoat", ClothingCategory.OVER_TOP, Color.YELLOW, [Weather.COLD, Weather.RAIN]),
+            Clothing("Pullover", ClothingCategory.TOP, Color.BROWN, [Weather.RAIN]),
+        ]
 
 
-#     # Get current weather conditions
-#     weather_conditions = get_meteo()
-#     print(f"Weather Conditions: {weather_conditions}")
+    # Get current weather conditions
+    weather_conditions = get_meteo()
+    print(f"Weather Conditions: {weather_conditions}")
 
-#     # Start with an initial item (e.g., Rain Boots)
-#     initial_item = clothes[0]  # Assume the first item is chosen
-#     print(f"Initial Item: {initial_item.descriptor} ({initial_item.category}, {initial_item.color}, {initial_item.weather_compatibilities})")
+    # Start with an initial item (e.g., Rain Boots)
+    initial_item = clothes[0]  # Assume the first item is chosen
+    print(f"Initial Item: {initial_item.descriptor} ({initial_item.category}, {initial_item.color}, {initial_item.weather_compatibilities})")
 
-#     # Generate the complete outfit
-#     recommendations = complete_outfit_with_openai(initial_item, clothes, weather_conditions)
+    # Generate the complete outfit
+    recommendations = complete_outfit_with_openai(initial_item, clothes, weather_conditions)
 
 #     recommendations = order_clothing_by_category(recommendations)
 #     print("Recommended Outfit:")

@@ -27,10 +27,10 @@ export default function TabLayout() {
         headerShown: useClientOnlyValue(false, true),
       }}>
       <Tabs.Screen
-        name="index"
+        name="Camera"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Camera',
+          tabBarIcon: ({ color }) => <TabBarIcon name="camera" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
@@ -48,12 +48,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="OutfitOfTheDay"
         options={{
           title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="star" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="Gallery"
+        options={{
+          title: 'Garderobe',
+          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />
+        }} />
     </Tabs>
   );
 }

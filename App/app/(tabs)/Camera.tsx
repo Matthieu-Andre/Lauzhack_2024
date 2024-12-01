@@ -1,11 +1,10 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef } from 'react';
 import { Button, Image, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
-import * as FileSystem from 'expo-file-system'; // Import expo-file-system
 import axios from 'axios';
 import Constants from "expo-constants";
 
-export default function App() {
+export default function Camera() {
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
     const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -47,31 +46,16 @@ export default function App() {
             console.error("No photo to upload");
             return;
         }
+
         const response = await fetch(photoUri);
         const blob = await response.blob();
-        // console.log(photoUri);
-        // console.log(typeof photoUri)
-        // // Extract the file name and type
-        // const fileName = photoUri.split('/').pop();
-        // const fileType = 'image/jpg';  // You can adjust this depending on the type of your image.
-        // console.log(fileName);
-        // Prepare FormData
-        // const formData = new FormData();
-        // formData.append('   ', photoUri);
-        const user_id = 'obamna';
+        const user_id = 'sloan';
         const formData = new FormData();
         formData.append('file', blob, 'photo.jpg');
-        // formData.append('user_id', user_id);
-        const { manifest } = Constants;
 
-        // const uri = `http://${manifest.debuggerHost.split(':').shift()}:8000`;
-        // console.log(uri);
         try {
-            // const response = await axios.post(`http://192.168.27.175:8000/${user_id}/image`, formData, {
-            const response = await axios.post(`http://192.168.27.175:8000/${user_id}/image`, formData, {
-
+            const response = await axios.post(`http://192.168.72.175:8000/${user_id}/image`, formData, {
                 headers: {
-                    // 'Content-Type': 'multipart/form-data', // Do NOT set this manually
                     'Accept': 'application/json', // Optionally, accept JSON
                 },
             });
@@ -85,57 +69,43 @@ export default function App() {
         }
     };
 
-
-
-    if (photoUri) {
-        // Render the photo preview with options to accept or retake
-        return (
-            <View style={styles.container}>
-                <Image source={{ uri: photoUri }} style={styles.preview} />
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.acceptButton} onPress={acceptPicture}>
-                        <Text style={styles.text}>Accept</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.retakeButton} onPress={retakePicture}>
-                        <Text style={styles.text}>Retake</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        );
-    }
-
     return (
         <View style={styles.container}>
-            <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-                        <Text style={styles.text}>Flip Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-                        <Text style={styles.text}>Take Picture</Text>
-                    </TouchableOpacity>
-                </View>
-            </CameraView>
+            {photoUri ? (
+                // Render the photo preview with options to accept or retake
+                <>
+                    <Image source={{ uri: photoUri }} style={styles.preview} />
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.acceptButton} onPress={acceptPicture}>
+                            <Text style={styles.text}>Accept</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.retakeButton} onPress={retakePicture}>
+                            <Text style={styles.text}>Retake</Text>
+                        </TouchableOpacity>
+                    </View>
+                </>
+            ) : (
+                // Render the camera view with buttons to take a picture
+                <>
+                    <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+                            <Text style={styles.text}>Flip Camera</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+                            <Text style={styles.text}>Take Picture</Text>
+                        </TouchableOpacity>
+                    </View>
+                </>
+            )}
         </View>
     );
-}
-
-async function convertBlobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-            const base64String = reader.result.split(',')[1]; // Extract base64 part
-            resolve(base64String);
-        };
-        reader.onerror = error => reject(error);
-    });
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'space-between',
     },
     message: {
         textAlign: 'center',
@@ -153,7 +123,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        margin: 20,
+        padding: 20,
     },
     button: {
         backgroundColor: '#2196F3',
@@ -181,3 +151,5 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 });
+
+export default Camera;

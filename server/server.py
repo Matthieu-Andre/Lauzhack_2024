@@ -14,12 +14,13 @@ app = FastAPI(title="aaaa")
 # Add CORS Middleware to allow requests from your frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update this to specific domains in production for security.
+    allow_origins=[
+        "*"
+    ],  # Allows all origins, use specific IPs/domains if needed for security
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
-
 
 
 app.mount("/images", StaticFiles(directory="images"), name="images")
@@ -35,15 +36,25 @@ def users():
 
 
 @app.get("/{user_id}/outfit_of_the_day")
-def outfit_of_the_day(user_id: str, reload: bool):
-    server.outfit_recommendation(user_id)
+def outfit_of_the_day(user_id: str, reload: bool = False) -> list[tuple[int, str]]:
+    if server.db.has_outfit_of_the_day(user_id) and reload == False:
+        outfit = server.db.get_outfit_of_the_day(user_id)
+    else:
+        outfit = server.outfit_recommendation(user_id)
+
+    return [(item.id, item.image_path) for item in outfit]
+
+
+@app.post("/{user_id}/outfit_of_the_day/confirm")
+def outfit_of_the_day_confirm(user_id: str, item_list: list[int]):
+    outfit = [server.db.get_item(user_id, item_id) for item_id in item_list]
+    server.db.set_outfit_of_the_day(user_id, outfit)
 
 
 @app.get("/{user_id}/garderobe")
-def get_garderobe(user_id: str) -> dict[int, str]:
+def get_garderobe(user_id: str) -> list[str]:
     clothes = server.db.get_garderobe(user_id)
-    return {item.id: f"{item.image_path}" for item in clothes}
-    return {item.id: item.get_encoded_image() for item in clothes}
+    return [f"{item.image_path}" for item in clothes]
 
 
 # @app.get("/{user_id}/garderobe/{clothing_id}")
@@ -52,15 +63,15 @@ def get_garderobe(user_id: str) -> dict[int, str]:
 #     return {item.id: item.get_encoded_image()}
 
 
-@app.post("/{user_id}/garderobe")
-def image(user_id: str, image: Image):
-    decoded_bytes = base64.b64decode(image.frame_data)
-    # Convert bytes to a numpy array
-    np_array = np.frombuffer(decoded_bytes, np.uint8)
-    # Decode the numpy array back to an image
-    decoded_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-    server.new_clothing_from_image(decoded_image, f"{user_id}_test.jpg")
-    return "image saved"
+# @app.post("/{user_id}/garderobe")
+# def image(user_id: str, image: Image):
+#     decoded_bytes = base64.b64decode(image.frame_data)
+#     # Convert bytes to a numpy array
+#     np_array = np.frombuffer(decoded_bytes, np.uint8)
+#     # Decode the numpy array back to an image
+#     decoded_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+#     server.new_clothing_from_image(decoded_image, f"{user_id}_test.jpg")
+#     return "image saved"
 
 
 @app.post("/{user_id}/image")
@@ -78,30 +89,47 @@ async def upload_file(user_id: str, file: UploadFile = File(...)):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-
 class Server:
     def __init__(self):
         self.db = DataBase()
         self.identifier = ClothingIdentifier()
-    
+
     def new_clothing_from_image(self, user_id: str, image: bytes) -> None:
         image_path = self.db.complete_image_path(Clothing.next_image_path())
         self.db.store_image_from_bytes(image, image_path)
         item = self.identifier.process(image_path)
         self.db.add_clothing(user_id, item)
 
+    def new_clothing_from_path(self, user_id: str, image_path: str) -> None:
+        with open(image_path, "rb") as f:
+            a = f.read()
+        self.new_clothing_from_image(user_id, a)
+    
+    def new_clothes_from_directory(self, user_id: str, path: str) -> None:
+        for root, _, filenames in os.walk(path):
+            for filename in filenames:
+                file = os.path.join(root, filename)
+                self.new_clothing_from_path(user_id, file)
+
     def outfit_recommendation(self, user_id: str) -> list[Clothing]:
         return outfit_recommendation(self.db.get_garderobe(user_id))
+
 
 
 server = Server()
 
 
 # if __name__ == "__main__":
-#     with open("temp/jacket.jpg", "rb") as f:
-#         a = f.read()
-#     server.new_clothing_from_image("sloan", a)
-#     outfit = server.outfit_recommendation("sloan")
-#     print("Recommended outfit: ")
-#     for i, x in enumerate(outfit):
-#         print(f"{i}.", x)
+#     # for x in ["crocs.jpg", "green_tshirt.jpg", "hat.jpg", "jacket.jpg", "jeans.jpg", "pants.jpg", "skirt.jpg", "thongs.jpg", "white_tshirt.jpg", "woman.jpg"]:
+#     #     server.new_clothing_from_path("sloan", os.path.join("temp/", x))
+#     user = "sloan"
+#     server.new_clothes_from_directory(user, "../clothes/")
+
+#     outfit = server.outfit_recommendation(user)
+
+#     print("\n\n")
+#     print("Recommended outfit:")
+#     for rec in outfit:
+#         print(
+#             f"{rec.descriptor} ({rec.category}, {rec.color}, {rec.weather_compatibilities})"
+#         )
