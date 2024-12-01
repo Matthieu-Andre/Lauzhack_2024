@@ -316,14 +316,14 @@ def complete_outfit_with_openai(
 if __name__ == "__main__":
     # Define clothing items
     clothes = [
-        # Clothing("Rain Boots", "footwear", "black", ["rain", "cold"]),
-        # Clothing("Sneakers", "footwear", "white", ["hot", "wind"]),
+        Clothing("Rain Boots", "footwear", "black", ["rain", "cold"]),
+        Clothing("Sneakers", "footwear", "white", ["hot", "wind"]),
         Clothing("Jeans", "lower_body_clothing", "blue", ["cold", "wind"]),
-        # Clothing("Shorts", "lower_body_clothing", "red", ["hot"]),
+        Clothing("Shorts", "lower_body_clothing", "red", ["hot"]),
         Clothing("T-Shirt", "upper_body_clothing", "white", ["hot"]),
-        # Clothing("Jacket", "over_upper_body_clothing", "black", ["cold", "rain"]),
-        # Clothing("Raincoat", "over_upper_body_clothing", "yellow", ["rain"]),
-        # Clothing("Pullover", "upper_body_clothing", "Brown", ["rain"]),
+        Clothing("Jacket", "over_upper_body_clothing", "black", ["cold", "rain"]),
+        Clothing("Raincoat", "over_upper_body_clothing", "yellow", ["rain"]),
+        Clothing("Pullover", "upper_body_clothing", "Brown", ["rain"]),
     ]
 
     # Get current weather conditions
